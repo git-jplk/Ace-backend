@@ -65,7 +65,7 @@ class QueryService:
     
     
 
-  async def query(self, company: str, prompt:str, additional_info = None) -> str:
+  async def query(self, prompt:str, additional_info = None) -> str:
     # 1) Ask the weather service
     if(additional_info is None):
       additional_info = """
@@ -104,7 +104,7 @@ class QueryService:
     self.json = self.parse_json(result)
     return result
   
-  def query_raw(self, company: str, prompt:str, additional_info = None) -> str:
+  def query_raw(self, prompt:str, additional_info = None) -> str:
     # 1) Ask the weather service
     if(additional_info is None):
       additional_info = """

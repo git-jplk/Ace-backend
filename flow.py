@@ -4,7 +4,7 @@ import asyncio
 async def invoke_flow(text: str):
     print(text)
     service = QueryService()
-    service.query_raw(text, text)
+    service.query_raw( text)
 
     parsed_input_as_json = service.json
 
@@ -85,11 +85,11 @@ async def invoke_flow(text: str):
     """
     print("1")
 
-    specialized_text_1 = await service.query(specialized_enrichment_prompt_1, specialized_enrichment_prompt_1)
+    specialized_text_1 = await service.query(specialized_enrichment_prompt_1)
     print("1")
-    specialized_text_2 = await service.query(specialized_enrichment_prompt_2, specialized_enrichment_prompt_2)
+    specialized_text_2 = await service.query( specialized_enrichment_prompt_2)
     print("1")
-    specialized_text_3 = await service.query(specialized_enrichment_prompt_3, specialized_enrichment_prompt_3)
+    specialized_text_3 = await service.query( specialized_enrichment_prompt_3)
     print("1")
 
     aggregated_text = f"""
@@ -144,13 +144,13 @@ async def invoke_flow(text: str):
     "summary": "..."
     }}
     """
-    service.query_raw(evaluation_prompt, evaluation_prompt)
+    service.query_raw(evaluation_prompt)
 
     print(service.json)
 
     return service.json
 
 if __name__ == "__main__":
-    company = "lanch"  
-    text = "You are a competent Analyst that scouts for startup companies. I need you to evaluate the startup company ${company}. I need you to give a final verdict with a detailed report on them and how you would value them as a company. Start what should be said to the user with FINAL_RESULT. You may check the online sources. I need especially the following information: 1) What is the company doing? 2) How are they doing it? 3) How are they different from their competitors? 4) What is their business model? 5) What is their target market? 6) What is their current valuation? 7) What are their future plans? 8) What are the risks associated with this company? 9) What is your final verdict on this company? Give me also the KPI's of their: growth rate, product stage, revenue growth, funding stage, and amount. You need to dig deep.  You should only retrieve this information from the following parsed pdf file;"
+    company = "Uber"  
+    text = "You are a competent Analyst that scouts for startup companies. I need you to evaluate the startup company Uber. I need you to give a final verdict with a detailed report on them and how you would value them as a company. Start what should be said to the user with FINAL_RESULT. You may check the online sources. I need especially the following information: 1) What is the company doing? 2) How are they doing it? 3) How are they different from their competitors? 4) What is their business model? 5) What is their target market? 6) What is their current valuation? 7) What are their future plans? 8) What are the risks associated with this company? 9) What is your final verdict on this company? Give me also the KPI's of their: growth rate, product stage, revenue growth, funding stage, and amount. You need to dig deep.  You should only retrieve this information from the following parsed pdf file;"
     asyncio.run(invoke_flow(text))
