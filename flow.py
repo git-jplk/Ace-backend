@@ -105,7 +105,7 @@ async def invoke_flow(text: str):
     evaluation_prompt = f"""
     You are a professional venture capitalist evaluating a startup.
 
-    Based solely on the information below — even if some fields are marked as "Not found" — assign the following scores from 0 to 10:
+    Based solely on the information below — even if some fields are marked as "Not found" or "Unknown" — assign the following scores from 0 to 10:
     - Team Score: Strength and experience of the founders
     - Market Score: Size and growth potential of the market
     - Product Score: Quality, innovation, and differentiation of the product
@@ -113,7 +113,7 @@ async def invoke_flow(text: str):
     - Risk Score: Estimated risk level (lower score means lower risk)
 
     Important:
-    - Do not assume any missing information. If a detail is marked as "Not found", lower the score appropriately and explain it.
+    - Do not assume any missing information. If a detail is marked as "Not found" or "Unknown", lower the score appropriately and explain it.
     - Only use what is present in the text. No external research or guessing.
     - Base the Final Overall Score on the provided scores, adjusting slightly if necessary.
 
