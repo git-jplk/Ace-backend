@@ -38,7 +38,7 @@ class QueryService:
           "command": "npx",
           "args": ["@playwright/mcp@latest"],
           "env": {
-            "DISPLAY": ":1"
+            "DISPLAY": ":0"
           }
         },
       }
@@ -50,7 +50,7 @@ class QueryService:
           "command": "npx",
           "args": ["@playwright/mcp@latest"],
           "env": {
-            "DISPLAY": ":1"
+            "DISPLAY": ":0"
           }
         },
       }
@@ -141,6 +141,7 @@ class QueryService:
     result = result.content
     
     self.json = self.parse_json(result)
+    print(result)
     return result
   
   def parse_json(self, text: str) -> dict:
@@ -153,6 +154,11 @@ class QueryService:
     Returns:
       dict: The parsed JSON as a dictionary.
     """
+    # Remove any leading or trailing whitespace 
+    if text.startswith("```json"):
+      text = text[7:]  # Remove the leading ```json
+    if text.endswith("```"):
+      text = text[:-3]  # Remove the trailing ```
     try:
       return json.loads(text)
     except json.JSONDecodeError as e:
@@ -168,7 +174,8 @@ revenue growth
 funding stage
 amount. You need to dig deep. You can also check any website you want. You need to be very detailed and give me a final verdict."""
   service.change_tool_access(ToolAccess.ALL)
-  await service.query(company,prompt)
+  prompt = "can you check the company profile of Uber on LinkedIn?"
+  await service.query(prompt, additional_info= " ")
   print(service.json)
 
 
