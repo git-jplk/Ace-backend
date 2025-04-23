@@ -8,6 +8,8 @@ async def invoke_flow(text: str):
 
     parsed_input_as_json = service.json
 
+    startup_name = parsed_input_as_json.get("startup_name", "Unknown")
+
     manual_enrichment = ""
     web_search_results = ""
 
@@ -152,7 +154,7 @@ async def invoke_flow(text: str):
     10. Dopplr: Travel startup that never reached mainstream scale.
     """
 
-        successful_examples = """
+    successful_examples = """
     - Snowflake: Cloud-native data warehouse that scaled efficiently; innovative architecture; strong team.
     - DoorDash: Solved a real need, saw explosive growth especially during the pandemic; IPO success.
     - Zoom: Great timing, perfect product-market fit, massive pandemic growth; easy UX.
@@ -171,10 +173,10 @@ async def invoke_flow(text: str):
     You have seen many real-world examples of both successful and failed startups.
     Use the following examples to calibrate your evaluation:
 
-    Examples of Failed Startups:
+    Examples of Failed Startups, that gets a very low score 1:
     {failed_examples}
 
-    Examples of Successful Startups:
+    Examples of Successful Startups, that get a very high score 10:
     {successful_examples}
 
     Now, based solely on the information below — even if some fields are marked as "Not found" or "Unknown" — assign the following scores from 0 to 10:
