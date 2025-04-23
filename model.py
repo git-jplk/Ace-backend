@@ -18,6 +18,7 @@ class QueryService:
   def __init__(self):
     load_dotenv()
     self.change_tool_access(ToolAccess.ALL)
+    self.json = {}
     
   
   def change_tool_access(self, tool_access: ToolAccess):
@@ -102,7 +103,7 @@ class QueryService:
     self.json = self.parse_json(result)
     return result
   
-  async def query(self, company: str, prompt:str, additional_info = None) -> str:
+  async def query_raw(self, company: str, prompt:str, additional_info = None) -> str:
     # 1) Ask the weather service
     if(additional_info is None):
       additional_info = """
