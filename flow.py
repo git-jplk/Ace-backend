@@ -93,6 +93,10 @@ async def invoke_flow(text: str):
     print("1")
 
     aggregated_text = f"""
+    {autumated_enrichment_websearch_prompt}
+    
+    compare the following information (if also appears in the previous one) with the previous one and prioritize the previous one:
+
     {specialized_text_1}
     {specialized_text_2}
     {specialized_text_3}
