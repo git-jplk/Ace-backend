@@ -18,20 +18,6 @@ class QueryService:
             "DISPLAY": ":1"
           }
         },
-        
-    "newsapi": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "-e",
-        "NEWS_API_KEY",
-        "mcp/news-api"
-      ],
-      "env": {
-        "NEWS_API_KEY": "aaf56fc9938d4408a0146ab70ce5adbb"
-      }
-    }
       }
     }
     self.client = MCPClient.from_dict(self.config)
@@ -45,7 +31,7 @@ product stage
 revenue growth
 funding stage
 amount. You need to dig deep. . You can also check their website. You need to be very detailed and give me a final verdict. I need this in a structured format. You can use markdown for that. I need this in a structured format. You can use markdown for that."""
-    prompt = "lookup John Cena on the internet using the tool, write it behind INTERNET: . then look up news on the pope NEWS: use the tools defined for both. only look up 5 pages"
+    #prompt = "Look up on the web who the founder of ACE Alternatives is. Look it up also in news articles."
     result = await self.weather_agent.run(
       prompt,
       max_steps=10,
