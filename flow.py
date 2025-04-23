@@ -36,7 +36,7 @@ async def invoke_flow(text: str):
     "founders": ["...", "..."]
     }}
     """
-    context_text_from_automated_enrichment = service.query_raw(autumated_enrichment_websearch_prompt, autumated_enrichment_websearch_prompt)
+    context_text_from_automated_enrichment = await service.query(autumated_enrichment_websearch_prompt, autumated_enrichment_websearch_prompt)
 
     specialized_enrichment_prompt_1 = f"""
     You are an expert startup analyst.
@@ -51,7 +51,7 @@ async def invoke_flow(text: str):
     Information:
     {context_text_from_automated_enrichment}
 
-    Respond in a clean structured bullet point format.
+    Respond in a clean structured bullet point format. Use the websearch to find the information if you need to.
     """
 
     specialized_enrichment_prompt_2 = f"""
@@ -67,7 +67,7 @@ async def invoke_flow(text: str):
     Information:
     {context_text_from_automated_enrichment}
 
-    Respond founder by founder in a clean structured format.
+    Respond founder by founder in a clean structured format. Use the websearch to find the information if you need to.
     """
     specialized_enrichment_prompt_3 = f"""
     You are analyzing the market for a startup.
@@ -81,12 +81,16 @@ async def invoke_flow(text: str):
     Information:
     {context_text_from_automated_enrichment}
 
-    Respond in a clean structured bullet point format.
+    Respond in a clean structured bullet point format. Use the websearch to find the information if you need to.
     """
+    print("1")
 
-    specialized_text_1 = service.query_raw(specialized_enrichment_prompt_1, specialized_enrichment_prompt_1)
-    specialized_text_2 = service.query_raw(specialized_enrichment_prompt_2, specialized_enrichment_prompt_2)
-    specialized_text_3 = service.query_raw(specialized_enrichment_prompt_3, specialized_enrichment_prompt_3)
+    specialized_text_1 = await service.query(specialized_enrichment_prompt_1, specialized_enrichment_prompt_1)
+    print("1")
+    specialized_text_2 = await service.query(specialized_enrichment_prompt_2, specialized_enrichment_prompt_2)
+    print("1")
+    specialized_text_3 = await service.query(specialized_enrichment_prompt_3, specialized_enrichment_prompt_3)
+    print("1")
 
     aggregated_text = f"""
     {specialized_text_1}

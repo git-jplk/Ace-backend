@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 from model import QueryService
 from werkzeug.utils import secure_filename
 import PyPDF2
-
+from flow import invoke_flow
 app = Flask(__name__)
 query_service = QueryService()
 def clean_text(text: str) -> str:
@@ -17,6 +17,20 @@ def clean_text(text: str) -> str:
     text = re.sub(r'\s+', ' ', text)
     # Strip leading/trailing whitespace
     return text.strip()
+
+@app.route('/start-search', methods=['POST'])
+async def start_search():
+    data = request.get_json()
+    if not data or 'content' not in data:
+        return jsonify({'error': 'Content is required in the request body.'}), 400
+
+    content = data['content']
+    try:
+        result = await invoke_flow(content)
+        return jsonify({'result': result}), 200
+    except Exception as e:
+        print(f"Error during query: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/upload_pdf', methods=['POST'])
 def upload_pdf_raw():

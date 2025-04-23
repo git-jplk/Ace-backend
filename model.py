@@ -63,6 +63,7 @@ class QueryService:
     temperature=0.7)
     self.agent = MCPAgent(llm=self.llm, client=self.client, max_steps=20)
     
+    
 
   async def query(self, company: str, prompt:str, additional_info = None) -> str:
     # 1) Ask the weather service
@@ -103,7 +104,7 @@ class QueryService:
     self.json = self.parse_json(result)
     return result
   
-  async def query_raw(self, company: str, prompt:str, additional_info = None) -> str:
+  def query_raw(self, company: str, prompt:str, additional_info = None) -> str:
     # 1) Ask the weather service
     if(additional_info is None):
       additional_info = """
@@ -135,8 +136,10 @@ class QueryService:
   }
       )"""
     #prompt = "Look up on the web who the founder of ACE Alternatives is. Look it up also in news articles."
-    result = await self.llm.invoke(
+    result = self.llm.invoke(
       prompt+additional_info)
+    result = result.content
+    
     self.json = self.parse_json(result)
     return result
   
