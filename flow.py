@@ -102,14 +102,86 @@ async def invoke_flow(text: str):
     {specialized_text_3}
     """
 
+    specialized_enrichment_prompt_4 = f"""
+    You are a research assistant for a venture capital firm.
+
+    Your task is to search social media platforms (e.g., LinkedIn, Twitter/X, Instagram, TikTok) to gather useful insights about a startup's public presence and activity. Focus only on *business-relevant* content. Avoid random or irrelevant posts.
+
+    Startup: "{startup_name}"
+
+    Your goal is to collect and summarize the following:
+    1. **Official Presence**: Do they have verified or active official accounts? Provide links.
+    2. **Content Activity**: Are they posting regularly? What type of content (e.g., product updates, hiring, customer success, thought leadership)?
+    3. **Engagement Level**: Do their posts get likes, comments, shares? Give an estimate (low, medium, high).
+    4. **Audience Type**: Who engages with their content? Customers, developers, investors, general public?
+    5. **Tone & Branding**: What's the general tone? Professional, playful, technical, community-driven?
+    6. **Notable Mentions**: Any press, viral content, partnerships, or influencers talking about them?
+    7. **Potential Red Flags**: Any controversies, backlash, customer complaints, or spammy practices?
+
+    Only use publicly available information. Be concise but informative.
+
+    Respond in this JSON format:
+    {{
+    "official_accounts": {{
+        "linkedin": "...",
+        "twitter": "...",
+        "instagram": "...",
+        "other": "..."
+    }},
+    "content_summary": "...",
+    "engagement_level": "...",
+    "audience_type": "...",
+    "tone_and_branding": "...",
+    "notable_mentions": "...",
+    "red_flags": "..."
+    }}
+    """
+
+    text_for_truncation_score = await service.query(specialized_enrichment_prompt_4)
+
+    failed_examples = """
+    1. MySpace: Failed to adapt to rising competitors like Facebook.
+    2. Friendster: Early to market but failed to scale and retain users.
+    3. Vine: Lost user engagement, eventually shut down.
+    4. Zapstream: Lacked traction despite live-streaming focus.
+    5. Dodgeball: Ahead of its time but unfriendly UX and poor ecosystem.
+    6. Chef'd: Sudden shutdown despite growth, issues with sustainability.
+    7. Secret: Anonymous social network, couldn’t maintain long-term value.
+    8. Gowalla: Lost out to more polished competitor (Foursquare).
+    9. ArgyleSocial: Failed to secure market traction.
+    10. Dopplr: Travel startup that never reached mainstream scale.
+    """
+
+        successful_examples = """
+    - Snowflake: Cloud-native data warehouse that scaled efficiently; innovative architecture; strong team.
+    - DoorDash: Solved a real need, saw explosive growth especially during the pandemic; IPO success.
+    - Zoom: Great timing, perfect product-market fit, massive pandemic growth; easy UX.
+    - Beyond Meat: Innovated in food, strong distribution, mainstream consumer adoption.
+    - Robinhood: Disrupted finance with commission-free trading; viral growth; appealed to new investor generation.
+    - Palantir: Deep tech with strong B2B/Gov traction; long-term contracts and strategic expansion.
+    - Stripe: Dev-friendly infrastructure; scaled globally; strong partnerships.
+    - SpaceX: Repeated technical innovation and delivery; long-term vision and execution.
+    - Uber: Disrupted transportation globally; diversified offerings and scaled rapidly.
+    - Airbnb: Democratized travel; great timing and product-market fit.
+    """
+
     evaluation_prompt = f"""
     You are a professional venture capitalist evaluating a startup.
 
-    Based solely on the information below — even if some fields are marked as "Not found" or "Unknown" — assign the following scores from 0 to 10:
+    You have seen many real-world examples of both successful and failed startups.
+    Use the following examples to calibrate your evaluation:
+
+    Examples of Failed Startups:
+    {failed_examples}
+
+    Examples of Successful Startups:
+    {successful_examples}
+
+    Now, based solely on the information below — even if some fields are marked as "Not found" or "Unknown" — assign the following scores from 0 to 10:
     - Team Score: Strength and experience of the founders
     - Market Score: Size and growth potential of the market
     - Product Score: Quality, innovation, and differentiation of the product
-    - Traction Score: Revenue, user growth, partnerships, or funding milestones
+    - Traction Score: Revenue, user growth, partnerships, or funding milestones, consider also the social media presence here the info: {text_for_truncation_score}
     - Risk Score: Estimated risk level (lower score means lower risk)
 
     Important:
@@ -118,9 +190,9 @@ async def invoke_flow(text: str):
     - Base the Final Overall Score on the provided scores, adjusting slightly if necessary.
 
     After assigning scores, provide:
-    - A brief justification (2-3 sentences) for each score
+    - A brief justification (2–3 sentences) for each score
     - A Final Overall Score
-    - A final 4-6 sentence summary giving an overall assessment of the startup’s potential and main concerns
+    - A final 4–6 sentence summary giving an overall assessment of the startup’s potential and main concerns
 
     Information:
     {aggregated_text}
@@ -144,6 +216,7 @@ async def invoke_flow(text: str):
     "summary": "..."
     }}
     """
+
     service.query_raw(evaluation_prompt)
 
     print(service.json)
