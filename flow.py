@@ -7,14 +7,14 @@ async def invoke_flow(text: str):
     service.query_raw( text)
 
     parsed_input_as_json = service.json
+    startup_name = parsed_input_as_json.get("startup_name", "Unkonwn")
 
-    startup_name = parsed_input_as_json.get("startup_name", "Unknown")
 
     manual_enrichment = ""
     web_search_results = ""
 
     autumated_enrichment_websearch_prompt = f"""
-    Some information below was extracted from a startup description.
+    Some information below was extracted from a startup description, from {startup_name}.
     Additional information has been manually enriched and retrieved through web search.
 
     Your task:
@@ -40,10 +40,13 @@ async def invoke_flow(text: str):
     """
     context_text_from_automated_enrichment = await service.query(autumated_enrichment_websearch_prompt, autumated_enrichment_websearch_prompt)
 
+    service_json = service.json
+    founders = service_json.get("founders", "Unknown")
+
     specialized_enrichment_prompt_1 = f"""
     You are an expert startup analyst.
 
-    Based on the information below, find and summarize key details about the startup:
+    Based on the information below, find and summarize key details about the startup {startup_name}:
     - What product or service do they offer?
     - What is their business model (how do they make money)?
     - What traction do they have (revenue, user growth, partnerships, clients)?
@@ -59,7 +62,7 @@ async def invoke_flow(text: str):
     specialized_enrichment_prompt_2 = f"""
     You are researching startup founders.
 
-    Based on the information below, find and summarize key details about the founders.
+    Based on the information below, find and summarize key details about the founders {founders}.
     For each founder, find:
     - Education background
     - Professional experience (previous startups, notable companies)
@@ -72,7 +75,7 @@ async def invoke_flow(text: str):
     Respond founder by founder in a clean structured format. Use the websearch to find the information if you need to.
     """
     specialized_enrichment_prompt_3 = f"""
-    You are analyzing the market for a startup.
+    You are analyzing the market for a startup named {startup_name}.
 
     Based on the information below, find and summarize:
     - The total addressable market (TAM) for their product/service
@@ -110,6 +113,7 @@ async def invoke_flow(text: str):
     Your task is to search social media platforms (e.g., LinkedIn, Twitter/X, Instagram, TikTok) to gather useful insights about a startup's public presence and activity. Focus only on *business-relevant* content. Avoid random or irrelevant posts.
 
     Startup: "{startup_name}"
+    Founders: "{founders}"
 
     Your goal is to collect and summarize the following:
     1. **Official Presence**: Do they have verified or active official accounts? Provide links.
@@ -168,7 +172,7 @@ async def invoke_flow(text: str):
     """
 
     evaluation_prompt = f"""
-    You are a professional venture capitalist evaluating a startup.
+    You are a professional venture capitalist evaluating a startup named {startup_name}, the founder(s) is(are) {founders}.
 
     You have seen many real-world examples of both successful and failed startups.
     Use the following examples to calibrate your evaluation:
@@ -201,6 +205,7 @@ async def invoke_flow(text: str):
 
     Respond in this exact JSON format:
     {{
+    "founder_name": "...",
     "team_score": ...,
     "market_score": ...,
     "product_score": ...,
@@ -227,5 +232,5 @@ async def invoke_flow(text: str):
 
 if __name__ == "__main__":
     company = "Uber"  
-    text = "You are a competent Analyst that scouts for startup companies. I need you to evaluate the startup company Uber. I need you to give a final verdict with a detailed report on them and how you would value them as a company. Start what should be said to the user with FINAL_RESULT. You may check the online sources. I need especially the following information: 1) What is the company doing? 2) How are they doing it? 3) How are they different from their competitors? 4) What is their business model? 5) What is their target market? 6) What is their current valuation? 7) What are their future plans? 8) What are the risks associated with this company? 9) What is your final verdict on this company? Give me also the KPI's of their: growth rate, product stage, revenue growth, funding stage, and amount. You need to dig deep.  You should only retrieve this information from the following parsed pdf file;"
+    text = f"You are a competent Analyst that scouts for startup companies. I need you to evaluate the startup company {company}. I need you to give a final verdict with a detailed report on them and how you would value them as a company. Start what should be said to the user with FINAL_RESULT. You may check the online sources. I need especially the following information: 1) What is the company doing? 2) How are they doing it? 3) How are they different from their competitors? 4) What is their business model? 5) What is their target market? 6) What is their current valuation? 7) What are their future plans? 8) What are the risks associated with this company? 9) What is your final verdict on this company? Give me also the KPI's of their: growth rate, product stage, revenue growth, funding stage, and amount. You need to dig deep.  You should only retrieve this information from the following parsed pdf file;"
     asyncio.run(invoke_flow(text))
