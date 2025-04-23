@@ -2,10 +2,8 @@ import asyncio
 import json
 import os
 from dotenv import load_dotenv
-from langchain_groq import ChatGroq
 from langchain_openai import ChatOpenAI
 from mcp_use import MCPClient, MCPAgent
-from PyPDF2 import PdfReader
 
 from enum import Enum
 
@@ -59,7 +57,7 @@ class QueryService:
     else:
       raise ValueError("Invalid tool access level")
     self.client = MCPClient.from_dict(self.config)
-    self.llm = llm = ChatOpenAI(
+    self.llm = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=0.7)
     self.agent = MCPAgent(llm=self.llm, client=self.client, max_steps=20)
@@ -104,6 +102,43 @@ class QueryService:
     self.json = self.parse_json(result)
     return result
   
+  async def query(self, company: str, prompt:str, additional_info = None) -> str:
+    # 1) Ask the weather service
+    if(additional_info is None):
+      additional_info = """
+          "Any time you finish your search, you MUST output a single JSON object "
+          "and nothing else.  "
+          "Your JSON MUST match the schema:\n"
+          "{
+    "founder_name": "",
+    "founder_experience": "",
+    "founder_press_mentions": "",
+    "startup_name": "",
+    "pitch": "",
+    "business_model": "",
+    "market_size": "",
+    "competition": "",
+    "innovation_score": ""
+  } if you dont have the information, write "NONE" EXAMPLE:
+
+  {
+    "founder_name": "John Doe",
+    "founder_experience": "5 years in tech startups",
+    "founder_press_mentions": 10,
+    "startup_name": "TechNova",
+    "pitch": "TechNova is revolutionizing the way AI is applied in healthcare.",
+    "business_model": "SaaS",
+    "market_size": "global healthcare",
+    "competition": "XYZ Corp",
+    "innovation_score": 9
+  }
+      )"""
+    #prompt = "Look up on the web who the founder of ACE Alternatives is. Look it up also in news articles."
+    result = await self.llm.invoke(
+      prompt+additional_info)
+    self.json = self.parse_json(result)
+    return result
+  
   def parse_json(self, text: str) -> dict:
     """
     Parses a JSON string and returns a dictionary.
@@ -119,29 +154,6 @@ class QueryService:
     except json.JSONDecodeError as e:
       print(f"Error parsing JSON: {e}")
       return {}
-  
-  def read_and_parse_pdf(file_path: str) -> str:
-    """
-    Reads a PDF file and extracts its text content.
-
-    Args:
-      file_path (str): The path to the PDF file.
-
-    Returns:
-      str: The extracted text content of the PDF.
-    """
-    try:
-      reader = PdfReader(file_path)
-      text = ""
-      for page in reader.pages:
-        text += page.extract_text()
-      
-      return text.strip()
-    except Exception as e:
-      print(f"Error reading PDF file: {e}")
-      return ""
-
-
 
 async def main():
   service = QueryService()
