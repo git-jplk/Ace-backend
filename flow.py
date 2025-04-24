@@ -57,6 +57,18 @@ async def invoke_flow(text: str):
     {context_text_from_automated_enrichment}
 
     Respond in a clean structured bullet point format. Use the websearch to find the information if you need to.
+    Return this JSON format:
+    {{
+    "summary": "...",
+    "pre_scores": {{
+        "product_score": 0-10,
+        "traction_score": 0-10
+    }},
+    "justification": {{
+        "product_score": "...",
+        "traction_score": "..."
+    }}
+    }}
     """
 
     specialized_enrichment_prompt_2 = f"""
@@ -73,6 +85,16 @@ async def invoke_flow(text: str):
     {context_text_from_automated_enrichment}
 
     Respond founder by founder in a clean structured format. Use the websearch to find the information if you need to.
+    Return this JSON format:
+    {{
+    "founder_insights": "...",
+    "pre_scores": {{
+        "team_score": 0-10
+    }},
+    "justification": {{
+        "team_score": "..."
+    }}
+    }}
     """
     specialized_enrichment_prompt_3 = f"""
     You are analyzing the market for a startup named {startup_name}.
@@ -87,6 +109,18 @@ async def invoke_flow(text: str):
     {context_text_from_automated_enrichment}
 
     Respond in a clean structured bullet point format. Use the websearch to find the information if you need to.
+    Return this JSON format:
+    {{
+    "market_insights": "...",
+    "pre_scores": {{
+        "market_score": 0-10,
+        "risk_score": 0-10
+    }},
+    "justification": {{
+        "market_score": "...",
+        "risk_score": "..."
+    }}
+    }}
     """
 
     specialized_text_1 = await service.query(specialized_enrichment_prompt_1, additional_info= " ")
@@ -136,11 +170,21 @@ async def invoke_flow(text: str):
     "audience_type": "...",
     "tone_and_branding": "...",
     "notable_mentions": "...",
-    "red_flags": "..."
+    "red_flags": "...",
+    "social_media_summary": "...",
+    "pre_scores": {{
+        "traction_score": 0-10,
+        "risk_score": 0-10
+    }},
+    "justification": {{
+        "traction_score": "...",
+        "risk_score": "..."
+    }}
     }}
     """
 
     text_for_truncation_score = await service.query(specialized_enrichment_prompt_4, additional_info= " ")
+
 
     #TODO: give these examples specific scores, so we can use them to calibrate the model
     failed_examples = """
@@ -201,11 +245,14 @@ async def invoke_flow(text: str):
     Information:
     {aggregated_text}
 
+    You must use the scores provided in the previous Inforamtion text to guide and calibrate your final evaluation, not override them. You can adjust slightly based on deeper insight.
+
     "Any time you finish your search, you MUST output a single JSON object "
     "and nothing else.  "
     "Your JSON MUST match the schema:\n"
     {{
     company_info: {{
+    "company_name": "...",
     "founder_name": "...",
     funding_stage: "...",
     funding_amount: "...",
