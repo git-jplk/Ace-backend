@@ -284,6 +284,7 @@ async def invoke_flow(text: str):
     If you cannot find the logo, provide a link to the first google image result for the startup name.
     It is paramount that the url works. it must be a direct image link and not a link to a website.
     You can use any search engine you want, but you must provide a link to the image.
+    use wikimedia commons, not wikipedia, if you find the logo there.
 
     Any time you finish your search, you MUST output a single JSON object "
     and nothing else.  "
