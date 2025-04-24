@@ -278,23 +278,26 @@ async def invoke_flow(text: str):
     }}
     """
 
-    find_logo= f"""
-    You are a professional Logo finder, that scours the web for startup logos.
-    Your task is to find the logo of the startup {startup_name} and provide a link to it.
-    If you cannot find the logo, provide a link to the first google image result for the startup name.
-    It is paramount that the url works. You may use websearch to find the logo.
+    find_logo = f"""
+        You are a professional Logo finder, that scours the web for startup logos.
+        Your task is to find the logo of the startup {startup_name} and provide a link to it.
+        If you cannot find the logo, provide a link to the first Google Image result for the startup name.
+        It is paramount that the URL works. You may use web search to find the logo.
 
-    Any time you finish your search, you MUST output a single JSON object "
-    and nothing else.  "
-    Your JSON MUST match the schema:\n"
-    "{{ url: "...."}}"
+        Important: Avoid Wikipedia links, as they do not allow CORS. Prefer direct image links or Wikimedia-hosted images instead (e.g., upload.wikimedia.org).
 
-    Example:
-    {{
-    "url": "https://example.com/logo.png"
-    }}
+        Any time you finish your search, you MUST output a single JSON object and nothing else.
+        Your JSON MUST match the schema:
+        {{
+            "url": "...."
+        }}
 
+        Example:
+        {{
+            "url": "https://example.com/logo.png"
+        }}
     """
+
     service.query_raw(evaluation_prompt, additional_info= " ")
     temp_json = service.json
     await service.query(find_logo, additional_info= " ")
