@@ -60,7 +60,7 @@ class QueryService:
     self.client = MCPClient.from_dict(self.config)
     self.llm = ChatOpenAI(
     model="gpt-4o-mini",
-    temperature=0.7)
+    temperature=0.0)
     self.agent = MCPAgent(llm=self.llm, client=self.client, max_steps=20)
     
     
@@ -101,7 +101,13 @@ class QueryService:
       prompt+additional_info,
       max_steps=10,
     )
-    self.json = self.parse_json(result)
+    try:
+      self.json = self.parse_json(result)
+    except Exception as e:
+      print(f"Error parsing JSON: {e}")
+      self.json = {}
+    print(result)
+    
     return result
   
   def query_raw(self, prompt:str, additional_info = None) -> str:
@@ -121,7 +127,12 @@ class QueryService:
     "market_size": "",
     "competition": "",
     "innovation_score": ""
-  } if you dont have the information, write "NONE" EXAMPLE:
+    funding_stage: "",
+    funding_amount: "",
+    growth_rate: "",
+    product_stage: "",
+    founding year: "",competitors: "",
+  } if you dont have the information, write "NONE", for numbers write 0. EXAMPLE:
 
   {
     "founder_name": "John Doe",
@@ -174,7 +185,7 @@ revenue growth
 funding stage
 amount. You need to dig deep. You can also check any website you want. You need to be very detailed and give me a final verdict."""
   service.change_tool_access(ToolAccess.ALL)
-  prompt = "can you check the company profile of Uber on LinkedIn?"
+  prompt = "can you search for subreddits of the company uber?"
   await service.query(prompt, additional_info= " ")
   print(service.json)
 

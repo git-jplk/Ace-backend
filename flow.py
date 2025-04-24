@@ -88,14 +88,10 @@ async def invoke_flow(text: str):
 
     Respond in a clean structured bullet point format. Use the websearch to find the information if you need to.
     """
-    print("1")
 
-    specialized_text_1 = await service.query(specialized_enrichment_prompt_1)
-    print("1")
-    specialized_text_2 = await service.query( specialized_enrichment_prompt_2)
-    print("1")
-    specialized_text_3 = await service.query( specialized_enrichment_prompt_3)
-    print("1")
+    specialized_text_1 = await service.query(specialized_enrichment_prompt_1, additional_info= " ")
+    specialized_text_2 = await service.query( specialized_enrichment_prompt_2, additional_info= " ")
+    specialized_text_3 = await service.query( specialized_enrichment_prompt_3, additional_info= " ")
 
     aggregated_text = f"""
     {context_text_from_automated_enrichment}
@@ -110,7 +106,8 @@ async def invoke_flow(text: str):
     specialized_enrichment_prompt_4 = f"""
     You are a research assistant for a venture capital firm.
 
-    Your task is to search social media platforms (e.g., LinkedIn, Twitter/X, Instagram, TikTok) to gather useful insights about a startup's public presence and activity. Focus only on *business-relevant* content. Avoid random or irrelevant posts.
+    Your task is to search social media platforms (e.g., LinkedIn, Twitter/X, Instagram, TikTok) to gather useful insights about a startup's public presence and activity. 
+    Focus only on *business-relevant* content. Avoid random or irrelevant posts.
 
     Startup: "{startup_name}"
     Founders: "{founders}"
@@ -143,8 +140,9 @@ async def invoke_flow(text: str):
     }}
     """
 
-    text_for_truncation_score = await service.query(specialized_enrichment_prompt_4)
+    text_for_truncation_score = await service.query(specialized_enrichment_prompt_4, additional_info= " ")
 
+    #TODO: give these examples specific scores, so we can use them to calibrate the model
     failed_examples = """
     1. MySpace: Failed to adapt to rising competitors like Facebook.
     2. Friendster: Early to market but failed to scale and retain users.
@@ -196,16 +194,25 @@ async def invoke_flow(text: str):
     - Base the Final Overall Score on the provided scores, adjusting slightly if necessary.
 
     After assigning scores, provide:
-    - A brief justification (2–3 sentences) for each score
+    - A justification for each score, explaining your reasoning and how you came to the score.
     - A Final Overall Score
     - A final 4–6 sentence summary giving an overall assessment of the startup’s potential and main concerns
 
     Information:
     {aggregated_text}
 
-    Respond in this exact JSON format:
+    "Any time you finish your search, you MUST output a single JSON object "
+    "and nothing else.  "
+    "Your JSON MUST match the schema:\n"
     {{
+    company_info: {{
     "founder_name": "...",
+    funding_stage: "...",
+    funding_amount: "...",
+    growth_rate: "",
+    product_stage: "...",
+    founding year: "...",
+    competitors: "...",}},
     "team_score": ...,
     "market_score": ...,
     "product_score": ...,
@@ -224,11 +231,34 @@ async def invoke_flow(text: str):
     }}
     """
 
-    service.query_raw(evaluation_prompt)
+    find_logo= f"""
+    You are a professional Logo finder, that scours the web for startup logos.
+    Your task is to find the logo of the startup {startup_name} and provide a link to it.
+    If you cannot find the logo, provide a link to the first google image result for the startup name.
+    It is paramount that the url works. You may use websearch to find the logo.
 
-    print(service.json)
+    Any time you finish your search, you MUST output a single JSON object "
+    and nothing else.  "
+    Your JSON MUST match the schema:\n"
+    "{{ url: "...."}}"
 
-    return service.json
+    Example:
+    {{
+    "url": "https://example.com/logo.png"
+    }}
+
+    """
+    service.query_raw(evaluation_prompt, additional_info= " ")
+    temp_json = service.json
+    await service.query(find_logo, additional_info= " ")
+    logo_json = service.json
+    logo_url = logo_json.get("url", "Unknown")
+    # Combine logo_json with temp_json into one single JSON
+    combined_json = {**temp_json, "logo_url": logo_url}
+
+    print("Combined JSON:", combined_json)
+
+    return combined_json
 
 if __name__ == "__main__":
     company = "Uber"  
